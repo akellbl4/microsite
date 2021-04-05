@@ -46,11 +46,8 @@ const loadErrorPage = async () => {
   return [ErrorPage, errorSrc];
 };
 
-const renderPage = async (
-  componentPath: string,
-  absoluteUrl: string,
-  initialProps?: any
-) => {
+const renderPage = async (page: string, initialProps?: any) => {
+  console.log(`rendering ${page}`);
   if (!renderToString) {
     const preactRenderToStringSrc = await devServer.getUrlForPackage(
       "preact-render-to-string"
@@ -95,7 +92,7 @@ const renderPage = async (
     try {
       let {
         exports: { default: Page },
-      } = await runtime.importModule(componentPath);
+      } = await runtime.importModule(page);
       if (typeof Page === "function") Component = Page;
 
       if (Page.Component) {
@@ -104,6 +101,8 @@ const renderPage = async (
         getStaticPaths = Page.getStaticPaths ?? noop;
       }
     } catch (e) {
+      if (e.message === "NOT_FOUND") return;
+      console.error(e);
       const [Page, errorSrc] = await loadErrorPage();
       Component = ErrorPage;
       pageProps = initialProps?.statusCode ? initialProps : { statusCode: 404 };
@@ -294,9 +293,10 @@ export default async function dev(
         try {
           await snowpack.loadUrl(path, { isSSR: true });
           return true;
-        } catch {
-          return false;
+        } catch (err) {
+          console.error(err.message);
         }
+        return false;
       };
 
       const findPotentialMatch = async (base: string) => {
