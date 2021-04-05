@@ -2,13 +2,13 @@
   "name": "@example/custom-ssr-fallback",
   "homepage": "/custom-ssr-fallback",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "scripts": {
     "start": "microsite",
     "build": "microsite build",
     "serve": "microsite build --serve"
   },
   "devDependencies": {
-    "microsite": "1.2.1"
+    "microsite": "^1.2.2-alpha.0"
   }
 }
