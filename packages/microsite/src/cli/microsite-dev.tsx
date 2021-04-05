@@ -14,6 +14,7 @@ import {
   generateStaticPropsContext,
   normalizePathName,
 } from "../utils/router.js";
+import fetch from "../server/fetch.js";
 
 const noop = () => Promise.resolve();
 
@@ -26,6 +27,9 @@ let __HeadContext: any;
 let __InternalDocContext: any;
 let ErrorPage: any;
 let errorSrc: string;
+
+declare var global: NodeJS.Global & { fetch: typeof fetch };
+global.fetch = fetch;
 
 const loadErrorPage = async () => {
   if (!ErrorPage) {
@@ -46,8 +50,11 @@ const loadErrorPage = async () => {
   return [ErrorPage, errorSrc];
 };
 
-const renderPage = async (page: string, initialProps?: any) => {
-  console.log(`rendering ${page}`);
+const renderPage = async (
+  componentPath: string,
+  absoluteUrl: string,
+  initialProps?: any
+) => {
   if (!renderToString) {
     const preactRenderToStringSrc = await devServer.getUrlForPackage(
       "preact-render-to-string"
@@ -92,7 +99,7 @@ const renderPage = async (page: string, initialProps?: any) => {
     try {
       let {
         exports: { default: Page },
-      } = await runtime.importModule(page);
+      } = await runtime.importModule(componentPath);
       if (typeof Page === "function") Component = Page;
 
       if (Page.Component) {
